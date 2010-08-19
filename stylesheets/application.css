@@ -1,0 +1,156 @@
+@charset "UTF-8";
+
+body {
+	margin: 0 auto;
+	width: 960px;
+	padding: 0;
+	font-size: 14px;
+	font-family: 'Trebuchet MS', sans-serif;
+}
+
+a:link,
+a:visited {
+	color: silver;
+}
+
+a:hover,
+a:active {
+	color: #6377ED;
+}
+
+#form {
+	text-align: left;
+	padding: 1em;
+	-moz-border-radius: 0 0 3px 3px;
+	-webkit-border-radius: 0 0 3px 3px;
+	border-radius: 0 0 3px 3px;
+	color: #38408B;
+	background-color: #99ACDD;
+}
+
+.word-types {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.word-type:hover {
+	background: #DAE1F0;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.word-type {
+	white-space: nowrap;
+}
+
+.word-type input {
+	display: inline-block;
+	margin: 0.25em 0.5em;
+}
+
+.word-type label {
+	display: inline-block;
+	width: 100%;
+	padding: 0.25em 1em 0.25em 0.5em;
+}
+
+.word {
+	display: inline-block;
+	vertical-align: top;
+	margin-left: 2em;
+}
+
+.word label {
+	display: block;
+	padding: 0.25em 0;
+}
+
+.word input {
+	background: #fff;
+	-moz-box-shadow: 0 1px 3px #ddd inset;
+	box-shadow: 0 1px 3px #ddd inset;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	border: none;
+	font-size: 160%;
+	padding: 0.25em;
+	margin: 0.25em 0;
+	vertical-align: middle;
+	width: 15em;
+}
+
+.word input:focus {
+	color: #3545AF;
+}
+
+.word button {
+	background: #ddd;
+  background: -moz-linear-gradient(90deg, #c7c7c7, #eeeeee);
+	-moz-box-shadow: 0 1px 5px #4864B1;
+	box-shadow: 0 1px 5px #4864B1;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	padding: 0.5em;
+	margin: 0.25em 0 0.25em 0.25em;
+	border: none;
+	font-size: 130%;
+	vertical-align: middle;
+}
+
+.word button:hover {
+	background: #eee;
+	background: -moz-linear-gradient(90deg, #dddddd, #ffffff);
+}
+
+.word button:active {
+	background: #ccc;
+	background: -moz-linear-gradient(90deg, #cccccc, #bbbbbb);
+	-moz-box-shadow: 0 1px 3px #4864B1 inset;
+	box-shadow: 0 1px 3px #4864B1 inset;
+}
+
+.result {
+	display: block;
+	margin: 0.5em 0;
+	padding: 0.5em;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	border: solid 1px #ccc;
+}
+
+.result.basic {
+	background: #eee;
+}
+
+.result.rare {
+	color: #aaa;
+}
+
+.result span {
+	display: inline-block;
+	vertical-align: middle;
+	margin: 0.15em 0;
+	line-height: 200%;
+	width: 40%;
+}
+
+.result div {
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 160%;
+}
+
+.column {
+	display: inline-block;
+	vertical-align: top;
+	width: 49.5%;
+	margin-left: 0.75%;
+}
+
+.column:first-child {
+	margin-left: 0;
+}

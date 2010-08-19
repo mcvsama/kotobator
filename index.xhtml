@@ -1,0 +1,117 @@
+<?xml version='1.0'?>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+	<head>
+		<script type='text/javascript' src='javascripts/prototype.js'></script>
+		<script type='text/javascript' src='javascripts/language:japanese.js'></script>
+		<script type='text/javascript' src='javascripts/application.js'></script>
+		<link rel='stylesheet' href='stylesheets/application.css' type='text/css'/>
+		<title>Kotobator</title>
+	</head>
+	<body>
+		<div id='form'>
+			<form>
+				<div class='word-types'>
+					<div class='word-type'>
+						<input type='radio' name='word-type' id='word-type:u-verb' checked='checked'/><label for='word-type:u-verb'>U-verb</label>
+					</div>
+					<div class='word-type'>
+						<input type='radio' name='word-type' id='word-type:ru-verb'/><label for='word-type:ru-verb'>RU-verb</label>
+					</div>
+					<div class='word-type'>
+						<input type='radio' name='word-type' id='word-type:suru-verb'/><label for='word-type:suru-verb'>SURU-verb</label>
+					</div>
+				</div>
+				<div class='word'>
+					<label for='word'>Dictionary form (type in hiragana):</label>
+					<input type='text' id='word'/>
+					<button id='compute' type='submit'>Compute!</button>
+				</div>
+			</form>
+		</div>
+		<div class='results'>
+			<div class='column'>
+				<div class='result basic'><span>Plain form</span> <div id='plain-form'></div></div>
+				<div class='result basic'><span>Plain past</span> <div id='plain-past-form'></div></div>
+				<div class='result basic'><span>Masu</span> <div id='masu-form'></div></div>
+				<div class='result basic'><span>Masu past</span> <div id='masu-past-form'></div></div>
+				<div class='result'><span>Tai</span> <div id='tai-form'></div></div>
+				<div class='result'><span>Te</span> <div id='te-form'></div></div>
+				<div class='result'><span>Causative</span> <div id='causative-form'></div></div>
+				<div class='result'><span>Causative Masu</span> <div id='causative-masu-form'></div></div>
+				<div class='result'><span>Caus. passive</span> <div id='causative-passive-form'></div></div>
+				<div class='result'><span>Caus. passive Masu</span> <div id='causative-passive-masu-form'></div></div>
+				<div class='result'><span>Volitional</span> <div id='volitional-form'></div></div>
+				<div class='result'><span>Volitional Masu</span> <div id='volitional-masu-form'></div></div>
+				<div class='result'><span>Te-iru</span> <div id='teiru-form'></div></div>
+				<div class='result'><span>Te-imasu</span> <div id='teimasu-form'></div></div>
+				<div class='result'><span>Conditional Eba</span> <div id='conditional-eba-form'></div></div>
+				<div class='result'><span>Conditional Ra</span> <div id='conditional-ra-form'></div></div>
+				<div class='result'><span>Passive form</span> <div id='passive-form'></div></div>
+				<div class='result'><span>Potential form</span> <div id='potential-form'></div></div>
+			</div><div class='column'>
+				<div class='result basic'><span>Plain negative</span> <div id='plain-negative-form'></div></div>
+				<div class='result basic'><span>Plain past negative</span> <div id='plain-past-negative-form'></div></div>
+				<div class='result basic'><span>Masu negative</span> <div id='masu-negative-form'></div></div>
+				<div class='result basic'><span>Masu past negative</span> <div id='masu-past-negative-form'></div></div>
+				<div class='result'><span>Tai negative</span> <div id='tai-negative-form'></div></div>
+				<div class='result'><span>Te negative</span> <div id='te-negative-form'></div></div>
+				<div class='result'><span>Causative negative</span> <div id='causative-negative-form'></div></div>
+				<div class='result'><span>Causative Masu negative</span> <div id='causative-masu-negative-form'></div></div>
+				<div class='result'><span>Caus. passive negative</span> <div id='causative-passive-negative-form'></div></div>
+				<div class='result'><span>Caus. passive Masu neg.</span> <div id='causative-passive-masu-negative-form'></div></div>
+				<div class='result rare'><span>Volitional negative</span> <div id='volitional-negative-form'></div></div>
+				<div class='result rare'><span>Volitional Masu negative</span> <div id='volitional-masu-negative-form'></div></div>
+			</div>
+		</div>
+		<script type='text/javascript'>
+			// <![CDATA[
+			$('word').focus()
+			$('word-type:u-verb').Word = Japanese.UVerb
+			$('word-type:ru-verb').Word = Japanese.RuVerb
+			$('word-type:suru-verb').Word = Japanese.SuruVerb
+			$('compute').observe ('click', function (event) {
+				event.stop()
+				try {
+					var Word = $$('[name=word-type]').find (function (o) { return o.checked }).Word
+					var word = new Word ($('word').value)
+					$('plain-form').innerHTML = word.plain_form()
+					$('plain-negative-form').innerHTML = word.plain_negative_form()
+					$('plain-past-form').innerHTML = word.plain_past_form()
+					$('plain-past-negative-form').innerHTML = word.plain_past_negative_form()
+					$('masu-form').innerHTML = word.masu_form();
+					$('masu-negative-form').innerHTML = word.masu_negative_form()
+					$('masu-past-form').innerHTML = word.masu_past_form()
+					$('masu-past-negative-form').innerHTML = word.masu_past_negative_form()
+					$('causative-form').innerHTML = word.causative_form()
+					$('causative-negative-form').innerHTML = word.causative_negative_form()
+					$('causative-masu-form').innerHTML = word.causative_masu_form()
+					$('causative-masu-negative-form').innerHTML = word.causative_masu_negative_form()
+					$('causative-passive-form').innerHTML = word.causative_passive_form()
+					$('causative-passive-negative-form').innerHTML = word.causative_passive_negative_form()
+					$('causative-passive-masu-form').innerHTML = word.causative_passive_masu_form()
+					$('causative-passive-masu-negative-form').innerHTML = word.causative_passive_masu_negative_form()
+					$('volitional-form').innerHTML = word.volitional_form()
+					$('volitional-negative-form').innerHTML = word.volitional_negative_form()
+					$('volitional-masu-form').innerHTML = word.volitional_masu_form()
+					$('volitional-masu-negative-form').innerHTML = word.volitional_masu_negative_form()
+					$('conditional-eba-form').innerHTML = word.conditional_eba_form()
+					$('conditional-ra-form').innerHTML = word.conditional_ra_form()
+					$('te-form').innerHTML = word.te_form()
+					$('te-negative-form').innerHTML = word.te_negative_form()
+					$('tai-form').innerHTML = word.tai_form()
+					$('tai-negative-form').innerHTML = word.tai_negative_form()
+					$('teiru-form').innerHTML = word.teiru_form()
+					$('teimasu-form').innerHTML = word.teimasu_form()
+					$('passive-form').innerHTML = word.passive_form()
+					$('potential-form').innerHTML = word.potential_form()
+					$('word').focus()
+				}
+				catch (exception)
+				{
+					alert (exception.message)
+				}
+			})
+			// ]]>
+		</script>
+	</body>
+</html>
