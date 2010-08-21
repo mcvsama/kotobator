@@ -154,3 +154,13 @@ a:active {
 .column:first-child {
 	margin-left: 0;
 }
+
+.disclaimer.alpha-version {
+	color: #fff;
+	background: #e00;
+	padding: 0.5em;
+}
+
+.disclaimer a {
+	color: #fff;
+}
