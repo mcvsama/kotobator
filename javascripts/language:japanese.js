@@ -236,6 +236,112 @@ Japanese.Hiragana = {
 				}
 			}
 			return s
+		},
+
+	hiraganize:
+		function (roomaji, options)
+		{
+			Object.extend (
+				options || {},
+				Object.extend ({
+					reduced: 0,
+					cursor_position: 0,
+					leave_trailing_n: false
+				}, options || {})
+			)
+
+			var ret = ''
+			var rows = 'kgsztdnhbpmyrw'
+			var columns = 'aiueo'
+
+			var p = 0;
+			var N = roomaji.length
+			repl3 = $H ({
+				'tsu': 'つ',
+				'sha': 'しゃ',
+				'shi': 'し',
+				'shu': 'しゅ',
+				'sho': 'しょ',
+				'cha': 'ちゃ',
+				'chi': 'ち',
+				'chu': 'ちゅ',
+				'cho': 'ちょ'
+			})
+
+			var reduce = function (num) {
+				if (p < options.cursor_position)
+					options.reduced += num
+			}
+
+			while (roomaji[p] != undefined)
+			{
+				var c0 = roomaji[p + 0]
+				var c1 = roomaji[p + 1]
+				var c2 = roomaji[p + 2]
+				var c3 = roomaji[p + 3]
+
+				if (Japanese.Hiragana.TABLE1[''][c0])
+				{
+					ret += Japanese.Hiragana.TABLE1[''][c0]
+					p += 1
+				}
+				else if (repl3.keys().include (roomaji.substr (p, 3)))
+				{
+					var v = repl3.get (roomaji.substr (p, 3))
+					ret += v
+					reduce (3 - v.length)
+					p += 3
+				}
+				else if (c0 == c1 && repl3.keys().include (roomaji.substr (p + 1, 3)))
+				{
+					var v = repl3.get (roomaji.substr (p + 1, 3))
+					ret += 'っ' + v
+					reduce (3 - v.length - 1)
+					p += 4
+				}
+				else if (Japanese.Hiragana.TABLE1[c0] && c1 == 'y' && ['a', 'u', 'o'].include (c2))
+				{
+					ret += Japanese.Hiragana.TABLE1[c0].i + ['ゃ', 'ゅ', 'ょ'][['a', 'u', 'o'].indexOf (c2)]
+					reduce (1)
+					p += 3
+				}
+				else if (c0 == 'n' && (c1 == undefined || Japanese.Hiragana.TABLE1[c1]))
+				{
+					if (!options.leave_trailing_n || c1)
+						ret += 'ん'
+					else
+						ret += 'n'
+					p += 1
+				}
+				else if (Japanese.Hiragana.TABLE1[c0] || c0 == 'c')
+				{
+					// っ-repeat
+					if (c0 == c1 && Japanese.Hiragana.TABLE1[c1][c2])
+					{
+						ret += 'っ' + Japanese.Hiragana.TABLE1[c1][c2]
+						reduce (1)
+						p += 3
+					}
+					else if (Japanese.Hiragana.TABLE1[c0] && Japanese.Hiragana.TABLE1[c0][c1])
+					{
+						ret += Japanese.Hiragana.TABLE1[c0][c1]
+						reduce (1)
+						p += 2
+					}
+					else
+					{
+						ret += c0
+						p += 1
+					}
+				}
+				else
+				{
+					ret += c0
+					p += 1
+				}
+			}
+
+			return ret
 		}
 }
 
@@ -424,6 +530,38 @@ Japanese.UVerb.IRREGULAR = {
 	}
 }
 
+
+Japanese.AutoHiraganize = Class.create ({
+	initialize:
+		function (element)
+		{
+			this.element = $(element)
+			this.element.observe ('keyup', this.process.bind (this))
+			this.element.observe ('keypress', this.keypress.bind (this))
+		},
+
+	keypress:
+		function (event)
+		{
+			this.last_char_code = event.charCode
+		},
+
+	process:
+		function (event)
+		{
+			if (this.last_char_code == 0)
+				this.element.value = Japanese.Hiragana.hiraganize (this.element.value, {})
+			else
+			{
+				var opt = {
+					cursor_position: this.element.selectionStart,
+					leave_trailing_n: true
+				}
+				this.element.value = Japanese.Hiragana.hiraganize (this.element.value, opt)
+				this.element.selectionStart = this.element.selectionEnd = opt.cursor_position - opt.reduced
+			}
+		}
+})
 
 /**
  * Ru-Verb
