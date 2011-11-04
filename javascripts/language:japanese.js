@@ -2,6 +2,7 @@
  * (C) 2009 Daleki-Wschod.pl
  * (C) Michał „mcv” Gawron
  * TODO The なければ nakereba form used for the negative form can be colloquially contracted to なきゃ nakya or なくちゃ nakucha. Thus 行かなければ ikanakereba can become 行かなきゃ ikanakya.
+ * TODO fix causative suru (suraseru) -> saseru
  */
 
 
@@ -617,6 +618,7 @@ Japanese.RuVerb = Class.create (Japanese.Verb, {
 Japanese.RuVerb.IRREGULAR = {
 	'くる': {
 		plain_negative: 'こない',
+		plain_past_negative: 'こなかった',
 		te: 'きて',
 		te_negative: 'こないで',
 		tai: 'きたい',
