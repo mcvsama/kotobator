@@ -496,7 +496,7 @@ Japanese.UVerb = Class.create (Japanese.Verb, {
 				'volitional', 'volitional_negative', 'volitional_masu', 'volitional_masu_negative',
 				'imperative', 'imperative_negative', 'imperative_masu', 'imperative_masu_negative',
 				'conditional_ba', 'conditional_ba_negative', 'conditional_ra', 'conditional_ra_negative',
-				'potential', 'potential_negative'
+				'potential', 'potential_negative', 'humble', 'honorific'
 			])
 		},
 
@@ -553,11 +553,13 @@ Japanese.UVerb.MAPPINGS = {
 
 Japanese.UVerb.IRREGULAR = {
 	'いく': {
+		kanji: '行く',
 		plain_negative: 'いかない',
 		te: 'いって',
 		te_negative: 'いかないで',
 		tai: 'いきたい',
-		tai_negative: 'いきたくない'
+		tai_negative: 'いきたくない',
+		honorific: 'いらっしゃる'
 	},
 	'ある': {
 		plain_negative: 'ない',
@@ -578,6 +580,14 @@ Japanese.UVerb.IRREGULAR = {
 		masu_negative: 'なさいません',
 		masu_past: 'なさいました',
 		masu_past_negative: 'なさいませんでした'
+	},
+	'のむ': {
+		kanji: '飲む',
+		honorific: 'めしあがる'
+	},
+	'いう': {
+		kanji: '言う',
+		honorific: 'おっしゃる'
 	}
 }
 
@@ -602,7 +612,7 @@ Japanese.RuVerb = Class.create (Japanese.Verb, {
 				'volitional', 'volitional_negative', 'volitional_masu', 'volitional_masu_negative',
 				'imperative', 'imperative_negative', 'imperative_masu', 'imperative_masu_negative',
 				'conditional_ba', 'conditional_ba_negative', 'conditional_ra', 'conditional_ra_negative',
-				'potential', 'potential_negative'
+				'potential', 'potential_negative', 'humble', 'honorific'
 			])
 		},
 
@@ -678,7 +688,19 @@ Japanese.RuVerb.IRREGULAR = {
 		conditional_ra: 'きたら',
 		conditional_ra_negative: 'くれなかったら',
 		potential: 'こられる',
-		potential_negative: 'こられない'
+		potential_negative: 'こられない',
+		honorific: 'ごらんになる'
+	},
+	'みる': {
+		kanji: '見る',
+		honorific: 'ごらんになる'
+	},
+	'いる': {
+		honorific: 'いらっしゃる'
+	},
+	'たべる': {
+		kanji: '食べる',
+		honorific: 'めしあがる'
 	}
 }
 
@@ -703,7 +725,7 @@ Japanese.SuruVerb = Class.create (Japanese.Verb, {
 				'volitional_negative', 'volitional_masu', 'volitional_masu_negative',
 				'imperative', 'imperative_negative', 'imperative_masu', 'imperative_masu_negative',
 				'conditional_ba', 'conditional_ba_negative', 'conditional_ra', 'conditional_ra_negative',
-				'potential', 'potential_negative'
+				'potential', 'potential_negative', 'humble', 'honorific'
 			])
 		},
 
@@ -779,7 +801,8 @@ Japanese.SuruVerb.IRREGULAR = {
 		conditional_ra: 'したら',
 		conditional_ra_negative: 'しなかったら',
 		potential: 'できる',
-		potential_negative: 'できない'
+		potential_negative: 'できない',
+		honorific: 'いたす'
 	}
 }
 
