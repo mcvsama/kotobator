@@ -252,11 +252,15 @@ Japanese.Hiragana = {
 			)
 
 			var ret = ''
-			var rows = 'kgsztdnhbpmyrw'
-			var columns = 'aiueo'
 
 			var p = 0;
 			var N = roomaji.length
+			repl2 = $H ({
+				'ja': 'じゃ',
+				'ji': 'じ',
+				'ju': 'じゅ',
+				'jo': 'じょ'
+			})
 			repl3 = $H ({
 				'tsu': 'つ',
 				'sha': 'しゃ',
@@ -293,11 +297,18 @@ Japanese.Hiragana = {
 					reduce (3 - v.length)
 					p += 3
 				}
+				else if (repl2.keys().include (roomaji.substr (p, 2)))
+				{
+					var v = repl2.get (roomaji.substr (p, 2))
+					ret += v
+					reduce (2 - v.length)
+					p += 3
+				}
 				else if (c0 == c1 && repl3.keys().include (roomaji.substr (p + 1, 3)))
 				{
 					var v = repl3.get (roomaji.substr (p + 1, 3))
 					ret += 'っ' + v
-					reduce (3 - v.length - 1)
+					reduce (3 - v.length)
 					p += 4
 				}
 				else if (Japanese.Hiragana.TABLE1[c0] && c1 == 'y' && ['a', 'u', 'o'].include (c2))
@@ -308,8 +319,15 @@ Japanese.Hiragana = {
 				}
 				else if (c0 == 'n' && (c1 == undefined || Japanese.Hiragana.TABLE1[c1]))
 				{
-					if (!options.leave_trailing_n || c1)
+					if (!options.leave_trailing_n || (c1 && c1 != 'y'))
+					{
+						if (c1 == 'n')
+						{
+							p += 1
+							reduce (1)
+						}
 						ret += 'ん'
+					}
 					else
 						ret += 'n'
 					p += 1
@@ -393,10 +411,22 @@ Japanese.Verb = Class.create (Japanese.Word, {
 			return this.te_form() + 'いる'
 		},
 
+	teiru_negative_form:
+		function()
+		{
+			return this.te_form() + 'いない'
+		},
+
 	teimasu_form:
 		function()
 		{
 			return this.te_form() + 'います'
+		},
+
+	teimasu_negative_form:
+		function()
+		{
+			return this.te_form() + 'いません'
 		},
 
 	__irregular:
@@ -425,15 +455,23 @@ Japanese.Verb = Class.create (Japanese.Word, {
 	volitional_negative_form: null,
 	volitional_masu_form: null,
 	volitional_masu_negative_form: null,
-	conditional_eba_form: null,
-	conditional_eba_negative_form: null,
+	imperative_form: null,
+	imperative_negative_form: null,
+	imperative_masu_form: null,
+	imperative_masu_negative_form: null,
+	conditional_ba_form: null,
+	conditional_ba_negative_form: null,
 	conditional_ra_form: null,
 	conditional_ra_negative_form: null,
 	potential_form: null,
+	potential_negative_form: null,
 	imperative_1_form: null,
 	imperative_1_negative_form: null,
 	imperative_2_form: null,
-	imperative_2_negative_form: null
+	imperative_2_negative_form: null,
+
+	honorific_form: function() { return '–' },
+	humble_form: function() { return '–' },
 })
 
 
@@ -451,12 +489,14 @@ Japanese.UVerb = Class.create (Japanese.Verb, {
 			if (Japanese.UVerb.MAPPINGS[this.ending] === undefined)
 				throw new Japanese.InvalidWord ('invalid u-verb')
 			this.irregulars ([
-				'plain_negative', 'plain_past_negative', 'te', 'te_negative', 'tai', 'tai_negative',
-				'masu', 'masu_negative', 'masu_past', 'masu_past_negative', 'passive', 'causative',
-				'causative_negative', 'causative_masu', 'causative_masu_negative', 'causative_passive',
+				'plain_negative', 'plain_past_negative', 'te', 'te_negative', 'te_negative_2', 'tai', 'tai_negative',
+				'masu', 'masu_negative', 'masu_past', 'masu_past_negative', 'passive', 'passive_negative',
+				'causative', 'causative_negative', 'causative_masu', 'causative_masu_negative', 'causative_passive',
 				'causative_passive_negative', 'causative_passive_masu', 'causative_passive_masu_negative',
 				'volitional', 'volitional_negative', 'volitional_masu', 'volitional_masu_negative',
-				'conditional_eba', 'conditional_ra', 'potential'
+				'imperative', 'imperative_negative', 'imperative_masu', 'imperative_masu_negative',
+				'conditional_ba', 'conditional_ba_negative', 'conditional_ra', 'conditional_ra_negative',
+				'potential', 'potential_negative'
 			])
 		},
 
@@ -464,6 +504,7 @@ Japanese.UVerb = Class.create (Japanese.Verb, {
 	plain_past_negative_form:				function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].a + 'なかった' },
 	te_form:								function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].te },
 	te_negative_form:						function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].a + 'ないで' },
+	te_negative_2_form:						function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].a + 'なくて' },
 	tai_form:								function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].i + 'たい' },
 	tai_negative_form:						function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].i + 'たくない' },
 	masu_form:								function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].ma + 'す' },
@@ -471,6 +512,7 @@ Japanese.UVerb = Class.create (Japanese.Verb, {
 	masu_past_form:							function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].ma + 'した' },
 	masu_past_negative_form:				function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].ma + 'せんでした' },
 	passive_form:							function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].a + 'れる' },
+	passive_negative_form:					function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].a + 'れない' },
 	causative_form:							function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].a + 'せる' },
 	causative_negative_form:				function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].a + 'せない' },
 	causative_masu_form:					function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].a + 'せます' },
@@ -483,9 +525,16 @@ Japanese.UVerb = Class.create (Japanese.Verb, {
 	volitional_negative_form:				function() { return this.plain_form() + 'まい' },
 	volitional_masu_form:					function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].i + 'ましょう' },
 	volitional_masu_negative_form:			function() { return this.masu_form() + 'まい' },
-	conditional_eba_form:					function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].e + 'ば' },
+	imperative_form:						function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].e },
+	imperative_negative_form:				function() { return this.plain_form() + 'な' },
+	imperative_masu_form:					function() { return this.te_form() + ' ください' },
+	imperative_masu_negative_form:			function() { return this.te_negative_form() + ' ください' },
+	conditional_ba_form:					function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].e + 'ば' },
+	conditional_ba_negative_form:			function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].a + 'なければ' },
 	conditional_ra_form:					function() { return this.plain_past_form() + 'ら' },
-	potential_form:							function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].e + 'る' }
+	conditional_ra_negative_form:			function() { return this.plain_past_negative_form() + 'ら' },
+	potential_form:							function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].e + 'る' },
+	potential_negative_form:				function() { return this.base_form() + Japanese.UVerb.MAPPINGS[this.ending].e + 'ない' }
 })
 
 
@@ -513,21 +562,224 @@ Japanese.UVerb.IRREGULAR = {
 	'ある': {
 		plain_negative: 'ない',
 		plain_past_negative: 'なかった',
-		potential: 'ありえる'
+		potential: 'ありえる',
+		potential_negative: 'ありえない' // TODO upewnij się, że tak jest w istocie
 	},
 	'いらっしゃる': {
 		te: 'いらっしゃって',
 		masu: 'いらっしゃいます',
 		masu_negative: 'いらっしゃいません',
 		masu_past: 'いらっしゃいました',
-		masu_past_negative: 'いらっしゃいませんでした',
+		masu_past_negative: 'いらっしゃいませんでした'
 	},
 	'なさる': {
 		te: 'なさって',
 		masu: 'なさいます',
 		masu_negative: 'なさいません',
 		masu_past: 'なさいました',
-		masu_past_negative: 'なさいませんでした',
+		masu_past_negative: 'なさいませんでした'
+	}
+}
+
+
+/**
+ * Ru-Verb
+ */
+
+
+Japanese.RuVerb = Class.create (Japanese.Verb, {
+	initialize:
+		function ($super, plain_form)
+		{
+			$super (Japanese.RuVerb, plain_form, plain_form.substr (0, plain_form.length - 1))
+			if (!plain_form.endsWith ('る'))
+				throw new Japanese.InvalidWord ('invalid ru-verb: does not end with る')
+			this.irregulars ([
+				'plain_negative', 'plain_past_negative', 'te', 'te_negative', 'te_negative_2', 'tai', 'tai_negative',
+				'masu', 'masu_negative', 'masu_past', 'masu_past_negative', 'passive', 'passive_negative',
+				'causative', 'causative_negative', 'causative_masu', 'causative_masu_negative', 'causative_passive',
+				'causative_passive_negative', 'causative_passive_masu', 'causative_passive_masu_negative',
+				'volitional', 'volitional_negative', 'volitional_masu', 'volitional_masu_negative',
+				'imperative', 'imperative_negative', 'imperative_masu', 'imperative_masu_negative',
+				'conditional_ba', 'conditional_ba_negative', 'conditional_ra', 'conditional_ra_negative',
+				'potential', 'potential_negative'
+			])
+		},
+
+	plain_negative_form:					function() { return this.base_form() + 'ない' },
+	plain_past_negative_form:				function() { return this.base_form() + 'なかった' },
+	te_form:								function() { return this.base_form() + 'て' },
+	te_negative_form:						function() { return this.base_form() + 'ないで' },
+	te_negative_2_form:						function() { return this.base_form() + 'なくて' },
+	tai_form:								function() { return this.base_form() + 'たい' },
+	tai_negative_form:						function() { return this.base_form() + 'たくない' },
+	masu_form:								function() { return this.base_form() + 'ます' },
+	masu_negative_form:						function() { return this.base_form() + 'ません' },
+	masu_past_form:							function() { return this.base_form() + 'ました' },
+	masu_past_negative_form:				function() { return this.base_form() + 'ませんでした' },
+	passive_form:							function() { return this.base_form() + 'られる' },
+	passive_negative_form:					function() { return this.base_form() + 'られない' },
+	causative_form:							function() { return this.base_form() + 'させる' },
+	causative_negative_form:				function() { return this.base_form() + 'させない' },
+	causative_masu_form:					function() { return this.base_form() + 'させます' },
+	causative_masu_negative_form:			function() { return this.base_form() + 'させません' },
+	causative_passive_form:					function() { return this.base_form() + 'させられる' },
+	causative_passive_negative_form:		function() { return this.base_form() + 'させられない' },
+	causative_passive_masu_form:			function() { return this.base_form() + 'させられます' },
+	causative_passive_masu_negative_form:	function() { return this.base_form() + 'させられません' },
+	volitional_form:						function() { return this.base_form() + 'よう' },
+	volitional_negative_form:				function() { return this.base_form() + 'まい' },
+	volitional_masu_form:					function() { return this.base_form() + 'ましょう' },
+	volitional_masu_negative_form:			function() { return this.masu_form() + 'まい' },
+	imperative_form:						function() { return this.base_form() + 'れ' },
+	imperative_negative_form:				function() { return this.plain_form() + 'な' },
+	imperative_masu_form:					function() { return this.te_form() + ' ください' },
+	imperative_masu_negative_form:			function() { return this.te_negative_form() + ' ください' },
+	conditional_ba_form:					function() { return this.base_form() + 'れば' },
+	conditional_ba_negative_form:			function() { return this.base_form() + 'なければ' },
+	conditional_ra_form:					function() { return this.plain_past_form() + 'ら' },
+	conditional_ra_negative_form:			function() { return this.base_form() + 'なかったら' },
+	potential_form:							function() { return this.base_form() + 'られる' }, // TODO czy ru-czasowniki w ogóle mają formę potencjalną?
+	potential_negative_form:				function() { return this.base_form() + 'られない' }
+})
+
+
+Japanese.RuVerb.IRREGULAR = {
+	'くる': {
+		plain_negative: 'こない',
+		plain_past_negative: 'こなかった',
+		te: 'きて',
+		te_negative: 'こないで',
+		te_negative_2: 'こなくて',
+		tai: 'きたい',
+		tai_negative: 'きたくない',
+		masu: 'きます',
+		masu_negative: 'きません',
+		masu_past: 'きました',
+		masu_past_negative: 'きませんでした',
+		passive: 'こられる',
+		passive_negative: 'こられない',
+		causative: 'こさせる',
+		causative_negative: 'こさせない',
+		causative_masu: 'こさせます',
+		causative_masu_negative: 'こさせません',
+		causative_passive: 'こさせられる',
+		causative_passive_negative: 'こさせられない',
+		causative_passive_masu: 'こさせられます',
+		causative_passive_masu_negative: 'こさせられません',
+		volitional: 'こよう',
+		volitional_negative: 'くるまい',
+		volitional_masu: 'こよましょう',
+		volitional_masu_negative: 'こよますまい',
+		imperative_form: 'くれ', // TODO tadashii no desu ka...
+		imperative_negative_form: '', // TODO kamosirene...
+		conditional_ba: 'くれば',
+		conditional_ba_negative: 'くれなければ',
+		conditional_ra: 'きたら',
+		conditional_ra_negative: 'くれなかったら',
+		potential: 'こられる',
+		potential_negative: 'こられない'
+	}
+}
+
+
+/**
+ * Suru-Verb
+ */
+
+
+Japanese.SuruVerb = Class.create (Japanese.Verb, {
+	initialize:
+		function ($super, plain_form)
+		{
+			$super (Japanese.SuruVerb, plain_form, plain_form.substr (0, plain_form.length - 2))
+			if (!plain_form.endsWith ('する'))
+				throw new Japanese.InvalidWord ('invalid suru-verb: does not end with する')
+			this.irregulars ([
+				'te', 'te_negative', 'tai', 'tai_negative', 'masu', 'masu_negative', 'masu_past',
+				'masu_past_negative', 'passive', 'passive_negative', 'causative', 'causative_negative', 'causative_masu',
+				'causative_masu_negative', 'causative_passive', 'causative_passive_negative',
+				'causative_passive_masu', 'causative_passive_masu_negative', 'volitional',
+				'volitional_negative', 'volitional_masu', 'volitional_masu_negative',
+				'imperative', 'imperative_negative', 'imperative_masu', 'imperative_masu_negative',
+				'conditional_ba', 'conditional_ba_negative', 'conditional_ra', 'conditional_ra_negative',
+				'potential', 'potential_negative'
+			])
+		},
+
+	plain_negative_form:
+		function()
+		{
+			return this.__irregular().plain_negative || (this.base_form() + 'しない')
+		},
+
+	te_form:								function() { return this.base_form() + 'して' },
+	te_negative_form:						function() { return this.base_form() + 'しないで' },
+	te_negative_2_form:						function() { return this.base_form() + 'しなくて' },
+	tai_form:								function() { return this.base_form() + 'したい' },
+	tai_negative_form:						function() { return this.base_form() + 'したくない' },
+	masu_form:								function() { return this.base_form() + 'します' },
+	masu_negative_form:						function() { return this.base_form() + 'しません' },
+	masu_past_form:							function() { return this.base_form() + 'しました' },
+	masu_past_negative_form:				function() { return this.base_form() + 'しませんでした' },
+	passive_form:							function() { return this.base_form() + 'される' },
+	passive_negative_form:					function() { return this.base_form() + 'されない' },
+	causative_form:							function() { return this.base_form() + 'させる' },
+	causative_negative_form:				function() { return this.base_form() + 'させない' },
+	causative_masu_form:					function() { return this.base_form() + 'させます' },
+	causative_masu_negative_form:			function() { return this.base_form() + 'させません' },
+	causative_passive_form:					function() { return this.base_form() + 'させられる' },
+	causative_passive_negative_form:		function() { return this.base_form() + 'させられない' },
+	causative_passive_masu_form:			function() { return this.base_form() + 'させられます' },
+	causative_passive_masu_negative_form:	function() { return this.base_form() + 'させられません' },
+	volitional_form:						function() { return this.base_form() + 'しよう' },
+	volitional_negative_form:				function() { return this.base_form() + 'しまい' },
+	volitional_masu_form:					function() { return this.base_form() + 'しましょう' },
+	volitional_masu_negative_form:			function() { return this.masu_form() + 'しますまい' },
+	imperative_form:						function() { return this.base_form() + 'しれ' },
+	imperative_negative_form:				function() { return this.plain_form() + 'な' },
+	imperative_masu_form:					function() { return this.te_form() + ' ください' },
+	imperative_masu_negative_form:			function() { return this.te_negative_form() + ' ください' },
+	conditional_ba_form:					function() { return this.base_form() + 'すれば' },
+	conditional_ba_negative_form:			function() { return this.base_form() + 'しなければ' },
+	conditional_ra_form:					function() { return this.plain_past_form() + 'ら' },
+	conditional_ra_negative_form:			function() { return this.plain_past_form() + 'なかったら' },
+	potential_form:							function() { return this.base_form() + 'できる' },
+	potential_negative_form:				function() { return this.base_form() + 'できない' }
+})
+
+
+Japanese.SuruVerb.IRREGULAR = {
+	'する': {
+		plain_negative: 'しない',
+		te: 'して',
+		te_negative: 'しないで',
+		tai: 'したい',
+		tai_negative: 'したくない',
+		masu: 'します',
+		masu_negative: 'しません',
+		masu_past: 'しました',
+		masu_past_negative: 'しませんでした',
+		passive: 'される',
+		passive_negative: 'されない',
+		causative: 'させる',
+		causative_negative: 'させない',
+		causative_masu: 'させます',
+		causative_masu_negative: 'させません',
+		causative_passive: 'させられる',
+		causative_passive_negative: 'させられない',
+		causative_passive_masu: 'させられます',
+		causative_passive_masu_negative: 'させられません',
+		volitional: 'しよう',
+		volitional_negative: 'しまい',
+		volitional_masu: 'しましょう',
+		volitional_masu_negative: 'しますまい',
+		conditional_ba: 'すれば',
+		conditional_ba_negative: 'しなければ',
+		conditional_ra: 'したら',
+		conditional_ra_negative: 'しなかったら',
+		potential: 'できる',
+		potential_negative: 'できない'
 	}
 }
 
@@ -539,6 +791,13 @@ Japanese.AutoHiraganize = Class.create ({
 			this.element = $(element)
 			this.element.observe ('keyup', this.process.bind (this))
 			this.element.observe ('keypress', this.keypress.bind (this))
+		},
+
+	set:
+		function (s)
+		{
+			this.element.value = s
+			this.process()
 		},
 
 	keypress:
@@ -563,170 +822,4 @@ Japanese.AutoHiraganize = Class.create ({
 			}
 		}
 })
-
-/**
- * Ru-Verb
- */
-
-
-Japanese.RuVerb = Class.create (Japanese.Verb, {
-	initialize:
-		function ($super, plain_form)
-		{
-			$super (Japanese.RuVerb, plain_form, plain_form.substr (0, plain_form.length - 1))
-			if (!plain_form.endsWith ('る'))
-				throw new Japanese.InvalidWord ('invalid ru-verb: does not end with る')
-			this.irregulars ([
-				'plain_negative', 'plain_past_negative', 'te', 'te_negative', 'tai', 'tai_negative',
-				'masu', 'masu_negative', 'masu_past', 'masu_past_negative', 'passive', 'causative',
-				'causative_negative', 'causative_masu', 'causative_masu_negative', 'causative_passive',
-				'causative_passive_negative', 'causative_passive_masu', 'causative_passive_masu_negative',
-				'volitional', 'volitional_negative', 'volitional_masu', 'volitional_masu_negative',
-				'conditional_eba', 'conditional_ra', 'potential'
-			])
-		},
-
-	plain_negative_form:					function() { return this.base_form() + 'ない' },
-	plain_past_negative_form:				function() { return this.base_form() + 'なかった' },
-	te_form:								function() { return this.base_form() + 'て' },
-	te_negative_form:						function() { return this.base_form() + 'ないで' },
-	tai_form:								function() { return this.base_form() + 'たい' },
-	tai_negative_form:						function() { return this.base_form() + 'たくない' },
-	masu_form:								function() { return this.base_form() + 'ます' },
-	masu_negative_form:						function() { return this.base_form() + 'ません' },
-	masu_past_form:							function() { return this.base_form() + 'ました' },
-	masu_past_negative_form:				function() { return this.base_form() + 'ませんでした' },
-	passive_form:							function() { return this.base_form() + 'られる' },
-	causative_form:							function() { return this.base_form() + 'させる' },
-	causative_negative_form:				function() { return this.base_form() + 'させない' },
-	causative_masu_form:					function() { return this.base_form() + 'させます' },
-	causative_masu_negative_form:			function() { return this.base_form() + 'させません' },
-	causative_passive_form:					function() { return this.base_form() + 'させられる' },
-	causative_passive_negative_form:		function() { return this.base_form() + 'させられない' },
-	causative_passive_masu_form:			function() { return this.base_form() + 'させられます' },
-	causative_passive_masu_negative_form:	function() { return this.base_form() + 'させられません' },
-	volitional_form:						function() { return this.base_form() + 'よう' },
-	volitional_negative_form:				function() { return this.base_form() + 'まい' },
-	volitional_masu_form:					function() { return this.base_form() + 'ましょう' },
-	volitional_masu_negative_form:			function() { return this.masu_form() + 'まい' },
-	conditional_eba_form:					function() { return this.base_form() + 'れば' },
-	conditional_ra_form:					function() { return this.plain_past_form() + 'ら' },
-	potential_form:							function() { return this.base_form() + 'られる' }
-})
-
-
-Japanese.RuVerb.IRREGULAR = {
-	'くる': {
-		plain_negative: 'こない',
-		plain_past_negative: 'こなかった',
-		te: 'きて',
-		te_negative: 'こないで',
-		tai: 'きたい',
-		tai_negative: 'きたくない',
-		masu: 'きます',
-		masu_negative: 'きません',
-		masu_past: 'きました',
-		masu_past_negative: 'きませんでした',
-		passive: 'こられる',
-		causative: 'こさせる',
-		causative_negative: 'こさせない',
-		causative_masu: 'こさせます',
-		causative_masu_negative: 'こさせません',
-		causative_passive: 'こさせられる',
-		causative_passive_negative: 'こさせられない',
-		causative_passive_masu: 'こさせられます',
-		causative_passive_masu_negative: 'こさせられません',
-		volitional: 'こよう',
-		volitional_negative: 'くるまい',
-		volitional_masu: 'こよましょう',
-		volitional_masu_negative: 'こよますまい',
-		conditional_eba: 'くれば',
-		conditional_ra: 'きたら',
-		potential: 'こられる'
-	}
-}
-
-
-/**
- * Suru-Verb
- */
-
-
-Japanese.SuruVerb = Class.create (Japanese.Verb, {
-	initialize:
-		function ($super, plain_form)
-		{
-			$super (Japanese.SuruVerb, plain_form, plain_form.substr (0, plain_form.length - 2))
-			if (!plain_form.endsWith ('する'))
-				throw new Japanese.InvalidWord ('invalid suru-verb: does not end with する')
-			this.irregulars ([
-				'te', 'te_negative', 'tai', 'tai_negative', 'masu', 'masu_negative', 'masu_past',
-				'masu_past_negative', 'passive', 'causative', 'causative_negative', 'causative_masu',
-				'causative_masu_negative', 'causative_passive', 'causative_passive_negative',
-				'causative_passive_masu', 'causative_passive_masu_negative', 'volitional',
-				'volitional_negative', 'volitional_masu', 'volitional_masu_negative',
-				'conditional_eba', 'conditional_ra', 'potential'
-			])
-		},
-
-	plain_negative_form:
-		function() { return this.__irregular().plain_negative || (this.base_form() + 'しない')
-		},
-
-	te_form:								function() { return this.__irregular().te || (this.base_form() + 'して') },
-	te_negative_form:						function() { return this.__irregular().te_negative || (this.base_form() + 'しないで') },
-	tai_form:								function() { return this.__irregular().tai || (this.base_form() + 'したい') },
-	tai_negative_form:						function() { return this.__irregular().tai_negative || (this.base_form() + 'したくない') },
-	masu_form:								function() { return this.__irregular().masu || (this.base_form() + 'します') },
-	masu_negative_form:						function() { return this.__irregular().masu_negative || (this.base_form() + 'しません') },
-	masu_past_form:							function() { return this.__irregular().masu_past || (this.base_form() + 'しました') },
-	masu_past_negative_form:				function() { return this.__irregular().masu_past_negative || (this.base_form() + 'しませんでした') },
-	passive_form:							function() { return this.__irregular().passive || (this.base_form() + 'される') },
-	causative_form:							function() { return this.__irregular().causative || (this.base_form() + 'させる') },
-	causative_negative_form:				function() { return this.__irregular().causative_negative || (this.base_form() + 'させない') },
-	causative_masu_form:					function() { return this.__irregular().causative_masu || (this.base_form() + 'させます') },
-	causative_masu_negative_form:			function() { return this.__irregular().causative_masu_negative || (this.base_form() + 'させません') },
-	causative_passive_form:					function() { return this.__irregular().causative_passive || (this.base_form() + 'させられる') },
-	causative_passive_negative_form:		function() { return this.__irregular().causative_passive_negative || (this.base_form() + 'させられない') },
-	causative_passive_masu_form:			function() { return this.__irregular().causative_passive_masu || (this.base_form() + 'させられます') },
-	causative_passive_masu_negative_form:	function() { return this.__irregular().causative_passive_masu_negative || (this.base_form() + 'させられません') },
-	volitional_form:						function() { return this.__irregular().volitional || (this.base_form() + 'しよう') },
-	volitional_negative_form:				function() { return this.__irregular().volitional_negative || (this.base_form() + 'しまい') },
-	volitional_masu_form:					function() { return this.__irregular().volitional_masu || (this.base_form() + 'しましょう') },
-	volitional_masu_negative_form:			function() { return this.__irregular().volitional_masu_negative || (this.masu_form() + 'しますまい') },
-	conditional_eba_form:					function() { return this.__irregular().conditional_eba || (this.base_form() + 'すれば') },
-	conditional_ra_form:					function() { return this.plain_past_form() + 'ら' },
-	potential_form:							function() { return this.__irregular().potential || (this.base_form() + 'できる') }
-})
-
-
-Japanese.SuruVerb.IRREGULAR = {
-	'する': {
-		plain_negative: 'しない',
-		te: 'して',
-		te_negative: 'しないで',
-		tai: 'したい',
-		tai_negative: 'したくない',
-		masu: 'します',
-		masu_negative: 'しません',
-		masu_past: 'しました',
-		masu_past_negative: 'しませんでした',
-		passive: 'さられる',
-		causative: 'させる',
-		causative_negative: 'させない',
-		causative_masu: 'させます',
-		causative_masu_negative: 'させません',
-		causative_passive: 'させられる',
-		causative_passive_negative: 'させられない',
-		causative_passive_masu: 'させられます',
-		causative_passive_masu_negative: 'させられません',
-		volitional: 'しよう',
-		volitional_negative: 'しまい',
-		volitional_masu: 'しましょう',
-		volitional_masu_negative: 'しますまい',
-		conditional_eba: 'すれば',
-		conditional_ra: 'したら',
-		potential: 'できる'
-	}
-}
 

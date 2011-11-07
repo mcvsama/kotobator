@@ -112,7 +112,43 @@ a:active {
 	box-shadow: 0 1px 3px #4864B1 inset;
 }
 
-.result {
+.results {
+	margin: 1em 0;
+	border-spacing: 0;
+	width: 100%;
+}
+
+.results th,
+.results td {
+	text-align: left;
+	vertical-align: top;
+}
+
+.results th {
+	width: 25%;
+	font-size: 140%;
+	line-height: 140%;
+	font-weight: bold;
+}
+
+.results td {
+	font-size: 160%;
+	line-height: 120%;
+	color: #a00;
+	font-family: sans-serif;
+}
+
+.results tr.separated th,
+.results tr.separated td {
+	padding-top: 1em;
+}
+
+.results tr.separator td {
+	padding-top: 1em;
+	border-bottom: solid 2px #000;
+}
+
+.blocks .result {
 	display: block;
 	margin: 0.5em 0;
 	padding: 0.5em;
@@ -122,15 +158,15 @@ a:active {
 	border: solid 1px #ccc;
 }
 
-.result.basic {
+.blocks .result.basic {
 	background: #eee;
 }
 
-.result.rare {
+.blocks .result.rare {
 	color: #aaa;
 }
 
-.result span {
+.blocks .result span {
 	display: inline-block;
 	vertical-align: middle;
 	margin: 0.15em 0;
@@ -138,7 +174,7 @@ a:active {
 	width: 40%;
 }
 
-.result div {
+.blocks .result div {
 	display: inline-block;
 	vertical-align: middle;
 	font-size: 160%;
