@@ -1,5 +1,5 @@
 /**
- * (C) 2009 Daleki-Wschod.pl
+ * (C) 2011 Daleki-Wschod.pl
  * (C) Michał „mcv” Gawron
  * TODO The なければ nakereba form used for the negative form can be colloquially contracted to なきゃ nakya or なくちゃ nakucha. Thus 行かなければ ikanakereba can become 行かなきゃ ikanakya.
  * TODO fix causative suru (suraseru) -> saseru
@@ -259,7 +259,8 @@ Japanese.Hiragana = {
 				'ja': 'じゃ',
 				'ji': 'じ',
 				'ju': 'じゅ',
-				'jo': 'じょ'
+				'jo': 'じょ',
+				'fu': 'ふ'
 			})
 			repl3 = $H ({
 				'tsu': 'つ',
@@ -317,7 +318,7 @@ Japanese.Hiragana = {
 					reduce (1)
 					p += 3
 				}
-				else if (c0 == 'n' && (c1 == undefined || Japanese.Hiragana.TABLE1[c1]))
+				else if (c0 == 'n' && (c1 == undefined || ['j', 'f'].include (c1) || Japanese.Hiragana.TABLE1[c1]))
 				{
 					if (!options.leave_trailing_n || (c1 && c1 != 'y'))
 					{
@@ -465,14 +466,34 @@ Japanese.Verb = Class.create (Japanese.Word, {
 	conditional_ra_negative_form: null,
 	potential_form: null,
 	potential_negative_form: null,
-	imperative_1_form: null,
-	imperative_1_negative_form: null,
-	imperative_2_form: null,
-	imperative_2_negative_form: null,
 
 	honorific_form: function() { return '–' },
 	humble_form: function() { return '–' },
 })
+
+
+// Return class object representing specified verb type.
+// Return null if can't guess.
+Japanese.Verb.guess_type = function (hiragana)
+{
+	if (hiragana.length < 2)
+		return null
+
+	if (hiragana.endsWith ('する'))
+		return Japanese.SuruVerb
+
+	var e2 = hiragana.split('').reverse()[1]
+
+	if (hiragana.endsWith ('る') && ['e', 'i'].include (Japanese.Hiragana.TABLE2[e2].v))
+		return Japanese.RuVerb
+
+	var e1 = hiragana.split('').reverse()[0]
+
+	if (Japanese.Hiragana.TABLE2[e1].v == 'u')
+		return Japanese.UVerb
+
+	return null
+}
 
 
 /**
@@ -487,7 +508,7 @@ Japanese.UVerb = Class.create (Japanese.Verb, {
 			$super (Japanese.UVerb, plain_form, plain_form.substr (0, plain_form.length - 1))
 			this.ending = plain_form[plain_form.length - 1]
 			if (Japanese.UVerb.MAPPINGS[this.ending] === undefined)
-				throw new Japanese.InvalidWord ('invalid u-verb')
+				throw new Japanese.InvalidWord ('U-verb must end with う')
 			this.irregulars ([
 				'plain_negative', 'plain_past_negative', 'te', 'te_negative', 'te_negative_2', 'tai', 'tai_negative',
 				'masu', 'masu_negative', 'masu_past', 'masu_past_negative', 'passive', 'passive_negative',
@@ -603,7 +624,12 @@ Japanese.RuVerb = Class.create (Japanese.Verb, {
 		{
 			$super (Japanese.RuVerb, plain_form, plain_form.substr (0, plain_form.length - 1))
 			if (!plain_form.endsWith ('る'))
-				throw new Japanese.InvalidWord ('invalid ru-verb: does not end with る')
+				throw new Japanese.InvalidWord ('RU-verb must end る')
+			if (plain_form.length < 2)
+				throw new Japanese.InvalidWord ('too short ru-verb')
+			var right = plain_form.split('').reverse().slice (0, 2).reverse().join('')
+			if (!['e', 'i'].include (Japanese.Hiragana.TABLE2[right[0]].v))
+				throw new Japanese.InvalidWord ('RU-verb must end with いる or える')
 			this.irregulars ([
 				'plain_negative', 'plain_past_negative', 'te', 'te_negative', 'te_negative_2', 'tai', 'tai_negative',
 				'masu', 'masu_negative', 'masu_past', 'masu_past_negative', 'passive', 'passive_negative',
@@ -641,7 +667,7 @@ Japanese.RuVerb = Class.create (Japanese.Verb, {
 	volitional_negative_form:				function() { return this.base_form() + 'まい' },
 	volitional_masu_form:					function() { return this.base_form() + 'ましょう' },
 	volitional_masu_negative_form:			function() { return this.masu_form() + 'まい' },
-	imperative_form:						function() { return this.base_form() + 'れ' },
+	imperative_form:						function() { return this.base_form() + 'ろ' },
 	imperative_negative_form:				function() { return this.plain_form() + 'な' },
 	imperative_masu_form:					function() { return this.te_form() + ' ください' },
 	imperative_masu_negative_form:			function() { return this.te_negative_form() + ' ください' },
@@ -650,7 +676,7 @@ Japanese.RuVerb = Class.create (Japanese.Verb, {
 	conditional_ra_form:					function() { return this.plain_past_form() + 'ら' },
 	conditional_ra_negative_form:			function() { return this.base_form() + 'なかったら' },
 	potential_form:							function() { return this.base_form() + 'られる' }, // TODO czy ru-czasowniki w ogóle mają formę potencjalną?
-	potential_negative_form:				function() { return this.base_form() + 'られない' }
+	potential_negative_form:				function() { return this.base_form() + 'られない' },
 })
 
 
@@ -689,7 +715,7 @@ Japanese.RuVerb.IRREGULAR = {
 		conditional_ra_negative: 'くれなかったら',
 		potential: 'こられる',
 		potential_negative: 'こられない',
-		honorific: 'ごらんになる'
+		honorific: 'いらっしゃる'
 	},
 	'みる': {
 		kanji: '見る',
@@ -716,7 +742,7 @@ Japanese.SuruVerb = Class.create (Japanese.Verb, {
 		{
 			$super (Japanese.SuruVerb, plain_form, plain_form.substr (0, plain_form.length - 2))
 			if (!plain_form.endsWith ('する'))
-				throw new Japanese.InvalidWord ('invalid suru-verb: does not end with する')
+				throw new Japanese.InvalidWord ('SURU-verb must end with する')
 			this.irregulars ([
 				'te', 'te_negative', 'tai', 'tai_negative', 'masu', 'masu_negative', 'masu_past',
 				'masu_past_negative', 'passive', 'passive_negative', 'causative', 'causative_negative', 'causative_masu',

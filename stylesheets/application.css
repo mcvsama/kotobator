@@ -26,30 +26,31 @@ a:active {
 	border-radius: 0 0 3px 3px;
 	color: #38408B;
 	background-color: #99ACDD;
+	text-shadow: 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff;
 }
 
-.word-types {
+.options {
 	display: inline-block;
 	vertical-align: top;
 }
 
-.word-type:hover {
+.option:hover {
 	background: #DAE1F0;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
-.word-type {
+.option {
 	white-space: nowrap;
 }
 
-.word-type input {
+.option input {
 	display: inline-block;
 	margin: 0.25em 0.5em;
 }
 
-.word-type label {
+.option label {
 	display: inline-block;
 	width: 100%;
 	padding: 0.25em 1em 0.25em 0.5em;
@@ -58,7 +59,7 @@ a:active {
 .word {
 	display: inline-block;
 	vertical-align: top;
-	margin-left: 2em;
+	margin: 0 3em;
 }
 
 .word label {
@@ -112,6 +113,12 @@ a:active {
 	box-shadow: 0 1px 3px #4864B1 inset;
 }
 
+.word #error {
+	margin: 0.2em 0 0 0;
+	padding: 0;
+	color: #c00;
+}
+
 .results {
 	margin: 1em 0;
 	border-spacing: 0;
@@ -127,7 +134,7 @@ a:active {
 .results th {
 	width: 25%;
 	font-size: 140%;
-	line-height: 140%;
+	line-height: 150%;
 	font-weight: bold;
 }
 

@@ -14,24 +14,29 @@
 		</div>
 		<div id='form'>
 			<form>
-				<div class='word-types'>
-					<div class='word-type'>
-						<input type='radio' name='word-type' id='word-type:u-verb' checked='checked'/><label for='word-type:u-verb'>U-verb (godan verb)</label>
+				<div class='options'>
+					<div class='option'>
+						<input type='checkbox' id='detect-type' checked='checked'/><label for='detect-type'>Detect verb type</label>
 					</div>
-					<div class='word-type'>
-						<input type='radio' name='word-type' id='word-type:ru-verb'/><label for='word-type:ru-verb'>RU-verb (ichidan verb)</label>
-					</div>
-					<div class='word-type'>
-						<input type='radio' name='word-type' id='word-type:suru-verb'/><label for='word-type:suru-verb'>SURU-verb</label>
-					</div>
-					<div class='word-type'>
+					<div class='option'>
 						<input type='checkbox' id='romanize'/><label for='romanize'>Roomaji results</label>
 					</div>
 				</div>
 				<div class='word'>
-					<label for='word'>Dictionary form:</label>
 					<input type='text' id='word'/>
-					<button id='compute' type='submit'>Compute!</button>
+					<button id='conjugate' type='submit'>Conjugate</button>
+					<p id='error'></p>
+				</div>
+				<div class='options'>
+					<div class='option'>
+						<input type='radio' name='word-type' id='word-type:u-verb' checked='checked'/><label for='word-type:u-verb'>U-verb (godan verb)</label>
+					</div>
+					<div class='option'>
+						<input type='radio' name='word-type' id='word-type:ru-verb'/><label for='word-type:ru-verb'>RU-verb (ichidan verb)</label>
+					</div>
+					<div class='option'>
+						<input type='radio' name='word-type' id='word-type:suru-verb'/><label for='word-type:suru-verb'>SURU-verb</label>
+					</div>
 				</div>
 			</form>
 		</div>
@@ -157,17 +162,69 @@
 				<td id='humble-form'></td>
 			</tr>
 		</table>
-		<p style='color: silver; font-size: 75%'>Stworzone przez <a href='http://mcv.mulabs.org/'>mcv</a>, wersja 1.</p>
+		<p style='color: silver; font-size: 75%'>Stworzone przez <a href='http://mcv.mulabs.org/'>mcv</a> przy konsultacji z Pekka; wersja 2.</p>
 		<script type='text/javascript'>
 			// <![CDATA[
-			function compute (event)
+			function clear_results()
+			{
+				$$('.results td[id*=form]').each (function (e) { e.innerHTML = '–' })
+			}
+
+			function parse_hash (hash)
+			{
+				var word, type, roomaji
+				;[word, type, roomaji] = hash.split ('/')
+				autohiraganize.set (word)
+				if (type == '1')
+					$('word-type:u-verb').checked = true
+				else if (type == '2')
+					$('word-type:ru-verb').checked = true
+				else
+					$('word-type:suru-verb').checked = true
+				$('romanize').checked = roomaji == '1'
+				$('detect-type').checked = false
+				conjugate()
+			}
+
+			function setup_hash()
+			{
+				var x = [Japanese.Hiragana.romanize ($('word').value)]
+				if ($('word-type:u-verb').checked)
+					x.push ('1')
+				else if ($('word-type:ru-verb').checked)
+					x.push ('2')
+				else
+					x.push ('3')
+				x.push ($('romanize').checked ? '1' : '0')
+				document.location.hash = x.join ('/')
+			}
+
+			function detect_and_conjugate (event)
+			{
+				if ($('detect-type').checked)
+				{
+					var t = Japanese.Verb.guess_type ($('word').value)
+					console.log(t)
+					if (t)
+						$$('[name=word-type]').each (function (i) {
+							if (i.Word == t)
+								i.checked = true
+						})
+				}
+
+				conjugate (event)
+			}
+
+			function conjugate (event)
 			{
 				if (event)
 					event.stop()
 				try {
 					var Word = $$('[name=word-type]').find (function (o) { return o.checked }).Word
 					var word = new Word ($('word').value)
-					document.location.hash = Japanese.Hiragana.romanize ($('word').value)
+
+					setup_hash();
+
 					$('plain-form').innerHTML = word.plain_form()
 					$('plain-negative-form').innerHTML = word.plain_negative_form()
 					$('plain-past-form').innerHTML = word.plain_past_form()
@@ -214,10 +271,17 @@
 						$$('.results td').each (function (td) {
 							td.innerHTML = Japanese.Hiragana.romanize (td.innerHTML)
 						})
+					$('error').innerHTML = ''
 				}
 				catch (exception)
 				{
-					alert (exception.message)
+					if (exception instanceof Japanese.InvalidWord)
+					{
+						clear_results()
+						$('error').innerHTML = exception.message.capitalize().escapeHTML()
+					}
+					else
+						alert (exception)
 				}
 			}
 
@@ -226,14 +290,14 @@
 			$('word-type:u-verb').Word = Japanese.UVerb
 			$('word-type:ru-verb').Word = Japanese.RuVerb
 			$('word-type:suru-verb').Word = Japanese.SuruVerb
-			$('compute').observe ('click', compute)
-			$('romanize').observe ('change', compute)
+			$('conjugate').observe ('click', detect_and_conjugate)
+			$('romanize').observe ('change', conjugate)
+			$$('[name=word-type]').invoke ('observe', 'change', conjugate)
+
+			clear_results()
 
 			if (document.location.hash)
-			{
-				autohiraganize.set (document.location.hash.substr (1))
-				compute()
-			}
+				parse_hash (document.location.hash.substr (1))
 			// ]]>
 		</script>
 	</body>
