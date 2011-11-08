@@ -29,9 +29,14 @@ a:active {
 	text-shadow: 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff;
 }
 
+.word + .options {
+	margin-left: 3em;
+}
+
 .options {
 	display: inline-block;
 	vertical-align: top;
+	margin-left: 2em;
 }
 
 .option:hover {
@@ -52,19 +57,13 @@ a:active {
 
 .option label {
 	display: inline-block;
-	width: 100%;
 	padding: 0.25em 1em 0.25em 0.5em;
 }
 
 .word {
 	display: inline-block;
 	vertical-align: top;
-	margin: 0 3em;
-}
-
-.word label {
-	display: block;
-	padding: 0.25em 0;
+	margin-left: 1em;
 }
 
 .word input {
@@ -120,6 +119,7 @@ a:active {
 }
 
 .results {
+	font-size: 80%;
 	margin: 1em 0;
 	border-spacing: 0;
 	width: 100%;
