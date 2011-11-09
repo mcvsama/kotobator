@@ -125,6 +125,16 @@ a:active {
 	width: 100%;
 }
 
+.results col:nth-child(1),
+.results col:nth-child(2) {
+	width: 15%;
+}
+
+.results col:nth-child(3),
+.results col:nth-child(4) {
+	width: 35%;
+}
+
 .results th,
 .results td {
 	text-align: left;
@@ -132,7 +142,6 @@ a:active {
 }
 
 .results th {
-	width: 25%;
 	font-size: 140%;
 	line-height: 150%;
 	font-weight: bold;

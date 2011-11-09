@@ -175,7 +175,7 @@ Japanese.Hiragana = {
 		},
 
 	romanize:
-		function (kana)
+		function (kana, reversible)
 		{
 			var s = ''
 			var c, k, z
@@ -214,7 +214,7 @@ Japanese.Hiragana = {
 						else if (c == 'ふ')
 							s += 'fu'
 						else if (c == 'ん')
-							s += 'n'
+							s += reversible ? 'nn' : 'n'
 						else if (c == 'ぁ')
 							s += 'a'
 						else if (c == 'ぃ')
@@ -242,7 +242,7 @@ Japanese.Hiragana = {
 	hiraganize:
 		function (roomaji, options)
 		{
-			Object.extend (
+			options = Object.extend (
 				options || {},
 				Object.extend ({
 					reduced: 0,
@@ -286,11 +286,13 @@ Japanese.Hiragana = {
 				var c2 = roomaji[p + 2]
 				var c3 = roomaji[p + 3]
 
+				// vowel alone
 				if (Japanese.Hiragana.TABLE1[''][c0])
 				{
 					ret += Japanese.Hiragana.TABLE1[''][c0]
 					p += 1
 				}
+				// repl3 table
 				else if (repl3.keys().include (roomaji.substr (p, 3)))
 				{
 					var v = repl3.get (roomaji.substr (p, 3))
@@ -298,13 +300,15 @@ Japanese.Hiragana = {
 					reduce (3 - v.length)
 					p += 3
 				}
+				// repl2 table
 				else if (repl2.keys().include (roomaji.substr (p, 2)))
 				{
 					var v = repl2.get (roomaji.substr (p, 2))
 					ret += v
 					reduce (2 - v.length)
-					p += 3
+					p += 2
 				}
+				// っ + repl3 table
 				else if (c0 == c1 && repl3.keys().include (roomaji.substr (p + 1, 3)))
 				{
 					var v = repl3.get (roomaji.substr (p + 1, 3))
@@ -312,12 +316,14 @@ Japanese.Hiragana = {
 					reduce (3 - v.length)
 					p += 4
 				}
+				// x + ゃ|ゅ|ょ (にゃ, etc)
 				else if (Japanese.Hiragana.TABLE1[c0] && c1 == 'y' && ['a', 'u', 'o'].include (c2))
 				{
 					ret += Japanese.Hiragana.TABLE1[c0].i + ['ゃ', 'ゅ', 'ょ'][['a', 'u', 'o'].indexOf (c2)]
 					reduce (1)
 					p += 3
 				}
+				// ん
 				else if (c0 == 'n' && (c1 == undefined || ['j', 'f'].include (c1) || Japanese.Hiragana.TABLE1[c1]))
 				{
 					if (!options.leave_trailing_n || (c1 && c1 != 'y'))
@@ -333,6 +339,7 @@ Japanese.Hiragana = {
 						ret += 'n'
 					p += 1
 				}
+				// Consonant + something...
 				else if (Japanese.Hiragana.TABLE1[c0] || c0 == 'c')
 				{
 					// っ-repeat
@@ -342,18 +349,21 @@ Japanese.Hiragana = {
 						reduce (1)
 						p += 3
 					}
+					// Consonant + vowel
 					else if (Japanese.Hiragana.TABLE1[c0] && Japanese.Hiragana.TABLE1[c0][c1])
 					{
 						ret += Japanese.Hiragana.TABLE1[c0][c1]
 						reduce (1)
 						p += 2
 					}
+					// Skip
 					else
 					{
 						ret += c0
 						p += 1
 					}
 				}
+				// Skip
 				else
 				{
 					ret += c0
@@ -871,4 +881,63 @@ Japanese.AutoHiraganize = Class.create ({
 			}
 		}
 })
+
+
+function run_tests()
+{
+	var h = Japanese.Hiragana.hiraganize
+	var r = function (s) { return Japanese.Hiragana.romanize (s, true) }
+
+	var assert = function (condition) {
+		if (!condition)
+			throw new Exception ("Assertion failed")
+	}
+
+	var test  = function (roomaji, hiragana, only_roomaji_to_hiragana) {
+		var t1 = roomaji == r (hiragana)
+		var t2 = roomaji == r (h (roomaji))
+		var t3 = hiragana == h (roomaji)
+		var t4 = hiragana == h (r (hiragana))
+
+		var fail = (only_roomaji_to_hiragana
+			? [t3, t4]
+			: [t1, t2, t3, t4]).any (function (e) { return !e })
+
+		if (fail)
+		{
+			var s = "Self test failed " + [roomaji, hiragana] + "\n\n"
+			if (!only_roomaji_to_hiragana)
+			{
+				if (!t1)
+					s += "t1: " + roomaji + " == " + r (hiragana) + "\n"
+				if (!t2)
+					s += "t2: " + roomaji + " == " + r (h (roomaji)) + "\n"
+			}
+			if (!t3)
+				s += "t3: " + hiragana + " == " + h (roomaji) + "\n"
+			if (!t4)
+				s += "t4: " + hiragana + " == " + h (r (hiragana)) + "\n"
+			alert (s)
+		}
+	}
+
+	test ('ja', 'じゃ')
+	test ('nya', 'にゃ')
+	test ('nyu', 'にゅ')
+	test ('nyo', 'にょ')
+	test ('mann', 'まん')
+	test ('nnji', 'んじ')
+	test ('nzi', 'んじ', true)
+	test ('mannaka', 'まんあか')
+	test ('mannnaka', 'まんなか')
+	test ('soujisuru', 'そうじする')
+	test ('soujisurunn', 'そうじするん')
+	test ('nyann', 'にゃん')
+	test ('nyonn', 'にょん')
+	test ('keionn', 'けいおん')
+	test ('nannja', 'なんじゃ')
+}
+
+
+run_tests()
 
