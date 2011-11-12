@@ -178,62 +178,93 @@ Japanese.Hiragana = {
 		function (kana, reversible)
 		{
 			var s = ''
-			var c, k, z
+			var c0, c1, c2, k, z
+			var c0cons, c0vowel
 			for (var i = 0, n = kana.length; i < n; ++i)
 			{
-				c = kana[i]
-				switch (c)
+				c0 = kana[i + 0]
+				c1 = kana[i + 1]
+				c2 = kana[i + 2]
+				c0vowel = Japanese.Hiragana.TABLE2[c0] ? Japanese.Hiragana.TABLE2[c0].v : undefined
+				c0cons = Japanese.Hiragana.TABLE2[c0] ? Japanese.Hiragana.TABLE2[c0].c : undefined
+				if (c0 == 'っ')
 				{
-					case 'っ':
-						k = Japanese.Hiragana.TABLE2[kana[i+1]]
-						s += k.c
-						break
-					default:
-						if (['ゃ', 'ゅ', 'ょ'].include (kana[i+1]))
-						{
-							z = (kana[i+1] == 'ゃ') ? 'a' : (kana[i+1] == 'ゅ') ? 'u' : 'o'
-							k = Japanese.Hiragana.TABLE2[c]
-							if (['き', 'ぎ', 'ぢ', 'に', 'ひ', 'び', 'ぴ', 'み', 'り'].include (c))
-								s += k.c + 'y' + z
-							else if (c == 'し')
-								s += 'sh' + z
-							else if (c == 'じ')
-								s += 'j' + z
-							else if (c == 'ち')
-								s += 'ch' + z
-							i += 1
-						}
-						else if (c == 'つ')
-							s += 'tsu'
-						else if (c == 'ち')
-							s += 'chi'
-						else if (c == 'し')
-							s += 'shi'
-						else if (c == 'じ')
-							s += 'ji'
-						else if (c == 'ふ')
-							s += 'fu'
-						else if (c == 'ん')
-							s += reversible ? 'nn' : 'n'
-						else if (c == 'ぁ')
-							s += 'a'
-						else if (c == 'ぃ')
-							s += 'i'
-						else if (c == 'ぅ')
-							s += 'u'
-						else if (c == 'ぇ')
-							s += 'e'
-						else if (c == 'ぉ')
-							s += 'o'
+					k = Japanese.Hiragana.TABLE2[c1]
+					s += k.c
+				}
+				else if (['ゃ', 'ゅ', 'ょ'].include (c1))
+				{
+					z = (c1 == 'ゃ') ? 'a' : (c1 == 'ゅ') ? 'u' : 'o'
+					if (!reversible)
+					{
+						if (z == 'a' && c2 == 'あ')
+							z = 'ā'
+						else if (z == 'u' && c2 == 'う')
+							z = 'ū'
+						else if (z == 'o' && c2 == 'う')
+							z = 'ō'
 						else
-						{
-							k = Japanese.Hiragana.TABLE2[kana[i]]
-							if (k !== undefined)
-								s += k.c + k.v
-							else
-								s += kana[i]
-						}
-						break
+							i -= 1
+						i += 1
+					}
+					k = Japanese.Hiragana.TABLE2[c0]
+					if (['き', 'ぎ', 'ぢ', 'に', 'ひ', 'び', 'ぴ', 'み', 'り'].include (c0))
+						s += k.c + 'y' + z
+					else if (c0 == 'し')
+						s += 'sh' + z
+					else if (c0 == 'じ')
+						s += 'j' + z
+					else if (c0 == 'ち')
+						s += 'ch' + z
+					i += 1
+				}
+				else if (c0 == 'つ')
+					s += 'tsu'
+				else if (c0 == 'ち')
+					s += 'chi'
+				else if (c0 == 'し')
+					s += 'shi'
+				else if (c0 == 'じ')
+					s += 'ji'
+				else if (c0 == 'ふ')
+					s += 'fu'
+				else if (c0 == 'ん')
+					s += reversible ? 'nn' : 'n'
+				else if (c0 == 'ぁ')
+					s += 'a'
+				else if (c0 == 'ぃ')
+					s += 'i'
+				else if (c0 == 'ぅ')
+					s += 'u'
+				else if (c0 == 'ぇ')
+					s += 'e'
+				else if (c0 == 'ぉ')
+					s += 'o'
+				else
+				{
+					if (!reversible && (c0 == 'あ' || c0vowel == 'a') && c1 == 'あ')
+					{
+						s += c0cons + 'ā'
+						i += 1
+					}
+					else if (!reversible && (c0 == 'う' || c0vowel == 'u') && c1 == 'う')
+					{
+						s += c0cons + 'ū'
+						i += 1
+					}
+					else if (!reversible && (c0 == 'お' || c0vowel == 'o') && c1 == 'う')
+					{
+						s += c0cons + 'ō'
+						i += 1
+					}
+					else
+					{
+						k = Japanese.Hiragana.TABLE2[c0]
+						if (k !== undefined)
+							s += k.c + k.v
+						else
+							s += c0
+					}
 				}
 			}
 			return s
@@ -260,7 +291,8 @@ Japanese.Hiragana = {
 				'ji': 'じ',
 				'ju': 'じゅ',
 				'jo': 'じょ',
-				'fu': 'ふ'
+				'fu': 'ふ',
+				"n'": 'ん'
 			})
 			repl3 = $H ({
 				'tsu': 'つ',
@@ -484,20 +516,24 @@ Japanese.Verb = Class.create (Japanese.Word, {
 
 // Return class object representing specified verb type.
 // Return null if can't guess.
-Japanese.Verb.guess_type = function (hiragana)
+// plain_form must be in hiragana
+Japanese.Verb.guess_type = function (plain_form)
 {
-	if (hiragana.length < 2)
+	if (plain_form.length < 2)
 		return null
 
-	if (hiragana.endsWith ('する'))
+	if (plain_form.endsWith ('する'))
 		return Japanese.SuruVerb
 
-	var e2 = hiragana.split('').reverse()[1]
+	var e2 = plain_form.split('').reverse()[1]
 
-	if (hiragana.endsWith ('る') && ['e', 'i'].include (Japanese.Hiragana.TABLE2[e2].v))
+	if (plain_form.endsWith ('る') &&
+		(['e', 'i'].include (Japanese.Hiragana.TABLE2[e2].v) || Japanese.RuVerb.IRREGULAR[plain_form]))
+	{
 		return Japanese.RuVerb
+	}
 
-	var e1 = hiragana.split('').reverse()[0]
+	var e1 = plain_form.split('').reverse()[0]
 
 	if (Japanese.Hiragana.TABLE2[e1].v == 'u')
 		return Japanese.UVerb
@@ -517,8 +553,11 @@ Japanese.UVerb = Class.create (Japanese.Verb, {
 		{
 			$super (Japanese.UVerb, plain_form, plain_form.substr (0, plain_form.length - 1))
 			this.ending = plain_form[plain_form.length - 1]
-			if (Japanese.UVerb.MAPPINGS[this.ending] === undefined)
-				throw new Japanese.InvalidWord ('U-verb must end with う')
+			if (!this.__klass.IRREGULAR[plain_form])
+			{
+				if (Japanese.UVerb.MAPPINGS[this.ending] === undefined)
+					throw new Japanese.InvalidWord ('U-verb must end with う')
+			}
 			this.irregulars ([
 				'plain_negative', 'plain_past_negative', 'te', 'te_negative', 'te_negative_2', 'tai', 'tai_negative',
 				'masu', 'masu_negative', 'masu_past', 'masu_past_negative', 'passive', 'passive_negative',
@@ -633,13 +672,16 @@ Japanese.RuVerb = Class.create (Japanese.Verb, {
 		function ($super, plain_form)
 		{
 			$super (Japanese.RuVerb, plain_form, plain_form.substr (0, plain_form.length - 1))
-			if (!plain_form.endsWith ('る'))
-				throw new Japanese.InvalidWord ('RU-verb must end る')
-			if (plain_form.length < 2)
-				throw new Japanese.InvalidWord ('too short ru-verb')
-			var right = plain_form.split('').reverse().slice (0, 2).reverse().join('')
-			if (!['e', 'i'].include (Japanese.Hiragana.TABLE2[right[0]].v))
-				throw new Japanese.InvalidWord ('RU-verb must end with いる or える')
+			if (!this.__klass.IRREGULAR[plain_form])
+			{
+				if (!plain_form.endsWith ('る'))
+					throw new Japanese.InvalidWord ('RU-verb must end る')
+				if (plain_form.length < 2)
+					throw new Japanese.InvalidWord ('too short ru-verb')
+				var right = plain_form.split('').reverse().slice (0, 2).reverse().join('')
+				if (!['e', 'i'].include (Japanese.Hiragana.TABLE2[right[0]].v))
+					throw new Japanese.InvalidWord ('RU-verb must end with いる or える')
+			}
 			this.irregulars ([
 				'plain_negative', 'plain_past_negative', 'te', 'te_negative', 'te_negative_2', 'tai', 'tai_negative',
 				'masu', 'masu_negative', 'masu_past', 'masu_past_negative', 'passive', 'passive_negative',
@@ -715,17 +757,17 @@ Japanese.RuVerb.IRREGULAR = {
 		causative_passive_masu_negative: 'こさせられません',
 		volitional: 'こよう',
 		volitional_negative: 'くるまい',
-		volitional_masu: 'こよましょう',
-		volitional_masu_negative: 'こよますまい',
-		imperative_form: 'くれ', // TODO tadashii no desu ka...
-		imperative_negative_form: '', // TODO kamosirene...
+		volitional_masu: 'きましょう',
+		imperative: 'こい', // TODO tadashii no desu ka...
+		imperative_negative: '', // TODO kamosirene...
 		conditional_ba: 'くれば',
 		conditional_ba_negative: 'くれなければ',
 		conditional_ra: 'きたら',
 		conditional_ra_negative: 'くれなかったら',
 		potential: 'こられる',
 		potential_negative: 'こられない',
-		honorific: 'いらっしゃる'
+		honorific: 'いらっしゃる',
+		humble: 'まいる'
 	},
 	'みる': {
 		kanji: '見る',
@@ -754,7 +796,7 @@ Japanese.SuruVerb = Class.create (Japanese.Verb, {
 			if (!plain_form.endsWith ('する'))
 				throw new Japanese.InvalidWord ('SURU-verb must end with する')
 			this.irregulars ([
-				'te', 'te_negative', 'tai', 'tai_negative', 'masu', 'masu_negative', 'masu_past',
+				'plain_negative', 'te', 'te_negative', 'tai', 'tai_negative', 'masu', 'masu_negative', 'masu_past',
 				'masu_past_negative', 'passive', 'passive_negative', 'causative', 'causative_negative', 'causative_masu',
 				'causative_masu_negative', 'causative_passive', 'causative_passive_negative',
 				'causative_passive_masu', 'causative_passive_masu_negative', 'volitional',
@@ -765,12 +807,7 @@ Japanese.SuruVerb = Class.create (Japanese.Verb, {
 			])
 		},
 
-	plain_negative_form:
-		function()
-		{
-			return this.__irregular().plain_negative || (this.base_form() + 'しない')
-		},
-
+	plain_negative_form:					function() { return this.base_form() + 'しない' },
 	te_form:								function() { return this.base_form() + 'して' },
 	te_negative_form:						function() { return this.base_form() + 'しないで' },
 	te_negative_2_form:						function() { return this.base_form() + 'しなくて' },
