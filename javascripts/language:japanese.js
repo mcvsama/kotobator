@@ -195,18 +195,18 @@ Japanese.Hiragana = {
 				else if (['ゃ', 'ゅ', 'ょ'].include (c1))
 				{
 					z = (c1 == 'ゃ') ? 'a' : (c1 == 'ゅ') ? 'u' : 'o'
-					if (!reversible)
-					{
-						if (z == 'a' && c2 == 'あ')
-							z = 'ā'
-						else if (z == 'u' && c2 == 'う')
-							z = 'ū'
-						else if (z == 'o' && c2 == 'う')
-							z = 'ō'
-						else
-							i -= 1
-						i += 1
-					}
+				//	if (!reversible)
+				//	{
+				//		if (z == 'a' && c2 == 'あ')
+				//			z = 'ā'
+				//		else if (z == 'u' && c2 == 'う')
+				//			z = 'ū'
+				//		else if (z == 'o' && c2 == 'う')
+				//			z = 'ō'
+				//		else
+				//			i -= 1
+				//		i += 1
+				//	}
 					k = Japanese.Hiragana.TABLE2[c0]
 					if (['き', 'ぎ', 'ぢ', 'に', 'ひ', 'び', 'ぴ', 'み', 'り'].include (c0))
 						s += k.c + 'y' + z
@@ -242,29 +242,29 @@ Japanese.Hiragana = {
 					s += 'o'
 				else
 				{
-					if (!reversible && (c0 == 'あ' || c0vowel == 'a') && c1 == 'あ')
-					{
-						s += c0cons + 'ā'
-						i += 1
-					}
-					else if (!reversible && (c0 == 'う' || c0vowel == 'u') && c1 == 'う')
-					{
-						s += c0cons + 'ū'
-						i += 1
-					}
-					else if (!reversible && (c0 == 'お' || c0vowel == 'o') && c1 == 'う')
-					{
-						s += c0cons + 'ō'
-						i += 1
-					}
-					else
-					{
+				//	if (!reversible && (c0 == 'あ' || c0vowel == 'a') && c1 == 'あ')
+				//	{
+				//		s += c0cons + 'ā'
+				//		i += 1
+				//	}
+				//	else if (!reversible && (c0 == 'う' || c0vowel == 'u') && c1 == 'う')
+				//	{
+				//		s += c0cons + 'ū'
+				//		i += 1
+				//	}
+				//	else if (!reversible && (c0 == 'お' || c0vowel == 'o') && c1 == 'う')
+				//	{
+				//		s += c0cons + 'ō'
+				//		i += 1
+				//	}
+				//	else
+				//	{
 						k = Japanese.Hiragana.TABLE2[c0]
 						if (k !== undefined)
 							s += k.c + k.v
 						else
 							s += c0
-					}
+				//	}
 				}
 			}
 			return s
